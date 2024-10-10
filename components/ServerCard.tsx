@@ -1,4 +1,6 @@
-import { NezhaAPISafe } from "@/app/types/nezha-api";
+import { NezhaAPISafe } from "@/app/[locale]/types/nezha-api";
+import ServerCardPopover from "@/components/ServerCardPopover";
+import ServerFlag from "@/components/ServerFlag";
 import ServerUsageBar from "@/components/ServerUsageBar";
 import { Card } from "@/components/ui/card";
 import {
@@ -7,18 +9,23 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatNezhaInfo } from "@/lib/utils";
-import ServerCardPopover from "./ServerCardPopover";
-import getUnicodeFlagIcon from "country-flag-icons/unicode";
+import { useLocale, useTranslations } from "next-intl";
+import { env } from "next-runtime-env";
+import { useRouter } from "next/navigation";
 
 export default function ServerCard({
   serverInfo,
 }: {
   serverInfo: NezhaAPISafe;
 }) {
-  const { name, country_code, online, cpu, up, down, mem, stg, ...props } =
+  const t = useTranslations("ServerCard");
+  const router = useRouter();
+  const { id, name, country_code, online, cpu, up, down, mem, stg, ...props } =
     formatNezhaInfo(serverInfo);
 
-  const showFlag = process.env.NEXT_PUBLIC_ShowFlag === "true";
+  const showFlag = env("NEXT_PUBLIC_ShowFlag") === "true";
+
+  const locale = useLocale();
 
   return online ? (
     <Card
@@ -29,15 +36,7 @@ export default function ServerCard({
       <Popover>
         <PopoverTrigger asChild>
           <section className={"flex items-center justify-start gap-2 lg:w-28"}>
-            {showFlag ? (
-              country_code ? (
-                <span className="text-[12px] text-muted-foreground">
-                  {getUnicodeFlagIcon(country_code)}
-                </span>
-              ) : (
-                <span className="text-[12px] text-muted-foreground">🏁</span>
-              )
-            ) : null}
+            {showFlag ? <ServerFlag country_code={country_code} /> : null}
             <p
               className={cn(
                 "break-all font-bold tracking-tight",
@@ -53,40 +52,43 @@ export default function ServerCard({
           <ServerCardPopover status={props.status} host={props.host} />
         </PopoverContent>
       </Popover>
-      <section className={"grid grid-cols-5 items-center gap-3"}>
-        <div className={"flex flex-col"}>
-          <p className="text-xs text-muted-foreground">CPU</p>
+      <section
+        onClick={() => {
+          router.push(`/${locale}/${id}`);
+        }}
+        className={"grid cursor-pointer grid-cols-5 items-center gap-3"}
+      >
+        <div className={"flex w-14 flex-col"}>
+          <p className="text-xs text-muted-foreground">{t("CPU")}</p>
           <div className="flex items-center text-xs font-semibold">
             {cpu.toFixed(2)}%
           </div>
           <ServerUsageBar value={cpu} />
         </div>
-        <div className={"flex flex-col"}>
-          <p className="text-xs text-muted-foreground">Mem</p>
+        <div className={"flex w-14 flex-col"}>
+          <p className="text-xs text-muted-foreground">{t("Mem")}</p>
           <div className="flex items-center text-xs font-semibold">
             {mem.toFixed(2)}%
           </div>
           <ServerUsageBar value={mem} />
         </div>
-        <div className={"flex flex-col"}>
-          <p className="text-xs text-muted-foreground">STG</p>
+        <div className={"flex w-14 flex-col"}>
+          <p className="text-xs text-muted-foreground">{t("STG")}</p>
           <div className="flex items-center text-xs font-semibold">
             {stg.toFixed(2)}%
           </div>
           <ServerUsageBar value={stg} />
         </div>
-        <div className={"flex flex-col"}>
-          <p className="text-xs text-muted-foreground">Upload</p>
+        <div className={"flex w-14 flex-col"}>
+          <p className="text-xs text-muted-foreground">{t("Upload")}</p>
           <div className="flex items-center text-xs font-semibold">
-            {up.toFixed(2)}
-            Mb/s
+            {up.toFixed(2)}M/s
           </div>
         </div>
-        <div className={"flex flex-col"}>
-          <p className="text-xs text-muted-foreground">Download</p>
+        <div className={"flex w-14 flex-col"}>
+          <p className="text-xs text-muted-foreground">{t("Download")}</p>
           <div className="flex items-center text-xs font-semibold">
-            {down.toFixed(2)}
-            Mb/s
+            {down.toFixed(2)}M/s
           </div>
         </div>
       </section>
@@ -100,15 +102,7 @@ export default function ServerCard({
       <Popover>
         <PopoverTrigger asChild>
           <section className={"flex items-center justify-start gap-2 lg:w-28"}>
-            {showFlag ? (
-              country_code ? (
-                <span className="text-[12px] text-muted-foreground">
-                  {getUnicodeFlagIcon(country_code)}
-                </span>
-              ) : (
-                <span className="text-[12px] text-muted-foreground">🏁</span>
-              )
-            ) : null}
+            {showFlag ? <ServerFlag country_code={country_code} /> : null}
             <p
               className={cn(
                 "break-all font-bold tracking-tight",
@@ -121,7 +115,7 @@ export default function ServerCard({
           </section>
         </PopoverTrigger>
         <PopoverContent className="w-fit p-2" side="top">
-          <p className="text-sm text-muted-foreground">Offline</p>
+          <p className="text-sm text-muted-foreground">{t("Offline")}</p>
         </PopoverContent>
       </Popover>
     </Card>

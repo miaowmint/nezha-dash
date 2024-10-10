@@ -1,30 +1,38 @@
 "use server";
 
-import { NezhaAPI, ServerApi } from "@/app/types/nezha-api";
-import { MakeOptional } from "@/app/types/utils";
-import { error } from "console";
+import { NezhaAPI, ServerApi } from "@/app/[locale]/types/nezha-api";
+import { MakeOptional } from "@/app/[locale]/types/utils";
+import getEnv from "@/lib/env-entry";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function GetNezhaData() {
-  if (!process.env.NezhaBaseUrl) {
-    error("NezhaBaseUrl is not set");
-    return;
-  }
-  // Remove trailing slash
-  var nezhaBaseUrl = process.env.NezhaBaseUrl;
+  noStore();
 
-  if (process.env.NezhaBaseUrl[process.env.NezhaBaseUrl.length - 1] === "/") {
-    nezhaBaseUrl = process.env.NezhaBaseUrl.slice(0, -1);
+  var nezhaBaseUrl = getEnv("NezhaBaseUrl");
+  if (!nezhaBaseUrl) {
+    console.log("NezhaBaseUrl is not set");
+    return { error: "NezhaBaseUrl is not set" };
+  }
+
+  // Remove trailing slash
+  if (nezhaBaseUrl[nezhaBaseUrl.length - 1] === "/") {
+    nezhaBaseUrl = nezhaBaseUrl.slice(0, -1);
   }
   try {
     const response = await fetch(nezhaBaseUrl + "/api/v1/server/details", {
       headers: {
-        Authorization: process.env.NezhaAuth as string,
+        Authorization: getEnv("NezhaAuth") as string,
       },
       next: {
         revalidate: 0,
       },
     });
-    const nezhaData = (await response.json()).result as NezhaAPI[];
+    const resData = await response.json();
+    const nezhaData = resData.result as NezhaAPI[];
+    if (!nezhaData) {
+      console.log(resData);
+      return { error: "NezhaData fetch failed" };
+    }
     const data: ServerApi = {
       live_servers: 0,
       offline_servers: 0,
@@ -52,6 +60,42 @@ export async function GetNezhaData() {
     );
 
     return data;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function GetServerMonitor({ server_id }: { server_id: number }) {
+  var nezhaBaseUrl = getEnv("NezhaBaseUrl");
+  if (!nezhaBaseUrl) {
+    console.log("NezhaBaseUrl is not set");
+    return { error: "NezhaBaseUrl is not set" };
+  }
+
+  // Remove trailing slash
+  if (nezhaBaseUrl[nezhaBaseUrl.length - 1] === "/") {
+    nezhaBaseUrl = nezhaBaseUrl.slice(0, -1);
+  }
+
+  try {
+    const response = await fetch(
+      nezhaBaseUrl + `/api/v1/monitor/${server_id}`,
+      {
+        headers: {
+          Authorization: getEnv("NezhaAuth") as string,
+        },
+        next: {
+          revalidate: 30,
+        },
+      },
+    );
+    const resData = await response.json();
+    const monitorData = resData.result;
+    if (!monitorData) {
+      console.log(resData);
+      return { error: "MonitorData fetch failed" };
+    }
+    return monitorData;
   } catch (error) {
     return error;
   }
