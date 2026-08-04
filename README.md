@@ -1,25 +1,69 @@
-<h1 align="center">NezhaDash</h1>
-
-<strong>NezhaDash 是一个基于 Next.js 和 哪吒监控 的仪表盘</strong>
+<div align="center"><img width="600" alt="nezhadash" src="https://github.com/user-attachments/assets/0a5768e1-96f2-4f8a-b77f-01488ed3b237"></div>
+<h3 align="center">NezhaDash 是一个基于 Next.js 和 哪吒监控 的仪表盘</h3>
 <br>
 
 </div>
 
-### 一键部署到 Vercel
+> [!CAUTION]
+> 此为 V0 兼容版本，与 V1 内置版本功能上可能有所不同
+>
+> V0 | V1 版本 issue 请在当前仓库发起
 
-[部署简易教程](https://buycoffee.top/blog/tech/nezha)
+> [!TIP]
+> 有关 V1 版本 pr 可移步 https://github.com/hamster1963/nezha-dash-v1
 
-#### 环境变量
+### 部署
 
-| 变量名                         | 含义                 | 示例                             |
-| ------------------------------ | -------------------- | -------------------------------- |
-| NezhaBaseUrl                   | nezha 面板地址       | http://120.x.x.x:8008            |
-| NezhaAuth                      | nezha 面板 API Token | 5hAY3QX6Nl9B3Uxxxx26KMvOMyXS1Udi |
-| NEXT_PUBLIC_NezhaFetchInterval | 获取数据间隔（毫秒） | **默认**：2000                   |
-| NEXT_PUBLIC_ShowFlag           | 是否显示旗帜         | **默认**：false                  |
-| NEXT_PUBLIC_DisableCartoon     | 是否禁用卡通人物     | **默认**：false                  |
+支持部署环境：
 
-<br>
+- Vercel
+- Cloudflare
+- Docker
 
-![screen-shot-one](/.github/shotOne.png)
-![screen-shot-two](/.github/shotTwo.png)
+[演示站点](https://nezha-vercel.vercel.app)
+[说明文档](https://nezhadash-docs.vercel.app)
+
+### 如何更新
+
+[更新教程](https://buycoffee.top/blog/tech/nezha-upgrade)
+
+### 环境变量
+
+[环境变量介绍](https://nezhadash-docs.vercel.app/environment)
+
+#### Komari 面板 API 兼容
+
+> [!CAUTION]
+> 实验性，未来可能会移除
+
+NezhaDash 现在支持 Komari 面板数据源。要启用 Komari 模式，请设置以下环境变量：
+
+- `NEXT_PUBLIC_Komari=true` - 启用 Komari 面板兼容模式
+- `KomariBaseUrl=https://ss.akz.moe` - Komari 面板的基础 URL
+
+当启用 Komari 模式时，系统将从以下 API 端点获取数据：
+- `KomariBaseUrl/api/nodes` - 获取服务器列表信息
+- `KomariBaseUrl/api/recent/{uuid}` - 获取每个服务器的实时监控数据
+
+> [!NOTE]
+> 在 Komari 模式下，系统会并发获取所有服务器的实时数据，提供准确的当前状态监控。如果某个服务器的实时数据获取失败，系统会降级到基础信息显示。
+
+#### MyNodeQuery 面板兼容
+
+NezhaDash 同样支持 [MyNodeQuery](https://status.idcoffer.com/) 数据源。要启用 MyNodeQuery 模式，请设置以下环境变量：
+
+- `NEXT_PUBLIC_MyNodeQuery=true` - 启用 MyNodeQuery 兼容模式
+- `MyNodeQueryBaseUrl=https://status.idcoffer.com` - MyNodeQuery 面板的基础 URL
+
+启用后系统会调用官方面板提供的 POST 接口：
+- `MyNodeQueryBaseUrl/Dashboard/GetNodes` - 获取服务器列表
+- `MyNodeQueryBaseUrl/Detail/GetDetail` - 获取指定服务器的详细信息（请求体：`{"UniqueID":"<节点 UniqueID>"}`）
+
+> [!NOTE]
+> MyNodeQuery 模式下仪表盘的网络图表会自动隐藏。
+
+![screen](/.github/v2-1.webp)
+![screen](/.github/v2-2.webp)
+![screen](/.github/v2-3.webp)
+![screen](/.github/v2-4.webp)
+![screen](/.github/v2-dark.webp)

@@ -1,10 +1,12 @@
-import withPWAInit from "@ducanh2912/next-pwa";
-
-import withBundleAnalyzer from "@next/bundle-analyzer";
+import withPWAInit from "@ducanh2912/next-pwa"
+import withBundleAnalyzer from "@next/bundle-analyzer"
+import createNextIntlPlugin from "next-intl/plugin"
 
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
-});
+})
+
+const withNextIntl = createNextIntlPlugin()
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -15,12 +17,21 @@ const withPWA = withPWAInit({
   workboxOptions: {
     disableDevLogs: true,
   },
-});
+})
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["*"],
+    },
+  },
+  reactCompiler: true,
   output: "standalone",
-  reactStrictMode: true,
-};
-
-export default bundleAnalyzer(withPWA(nextConfig));
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
+}
+export default bundleAnalyzer(withPWA(withNextIntl(nextConfig)))

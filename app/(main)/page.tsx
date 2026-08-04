@@ -1,22 +1,11 @@
-import ServerList from "@/components/ServerList";
-import ServerOverview from "@/components/ServerOverview";
-import { GetNezhaData } from "@/lib/serverFetch";
+import ServerListClient from "@/app/(main)/ClientComponents/main/ServerListClient"
+import ServerOverviewClient from "@/app/(main)/ClientComponents/main/ServerOverviewClient"
 
-import { SWRConfig } from "swr";
-
-export default function Home() {
+export default async function Home() {
   return (
-    <SWRConfig
-      value={{
-        fallback: {
-          "/api/server": GetNezhaData(),
-        },
-      }}
-    >
-      <div className="mx-auto grid w-full max-w-5xl gap-4 md:gap-6">
-        <ServerOverview />
-        <ServerList />
-      </div>
-    </SWRConfig>
-  );
+    <div className="mx-auto grid w-full max-w-5xl gap-4 md:gap-6">
+      <ServerOverviewClient />
+      <ServerListClient />
+    </div>
+  )
 }

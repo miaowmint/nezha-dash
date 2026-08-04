@@ -1,11 +1,20 @@
-import { GetNezhaData } from "@/lib/serverFetch";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"
+import { createErrorResponse, requireApiSession } from "@/lib/api-route"
+import { GetServerData } from "@/lib/serverFetchV2"
 
-export async function GET(_: Request) {
+export const dynamic = "force-dynamic"
+
+export async function GET() {
+  const unauthorizedResponse = await requireApiSession()
+  if (unauthorizedResponse) {
+    return unauthorizedResponse
+  }
+
   try {
-    const response = await GetNezhaData();
-    return NextResponse.json(response, { status: 200 });
+    const data = await GetServerData()
+    return NextResponse.json(data, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ error: error }, { status: 200 });
+    console.error("Error in GET handler:", error)
+    return createErrorResponse(error)
   }
 }
